@@ -297,12 +297,6 @@ describe "Mailboxer::Models::Messageable through User" do
     @conversation.receipts_for(@entity1).first.trashed.should==true
   end
 
-  it "should be able to read attachment" do
-    @receipt = @entity1.send_message(@entity2, "Body", "Subject", nil, File.open('spec/testfile.txt'))
-    @conversation = @receipt.conversation
-    @conversation.messages.first.attachment_identifier.should=='testfile.txt'
-  end
-
   it "should be the same message time as passed" do
     message_time = 5.days.ago
     receipt = @entity1.send_message(@entity2, "Body", "Subject", nil, nil, message_time)

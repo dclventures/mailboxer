@@ -45,7 +45,6 @@ ActiveRecord::Schema.define(:version => 20120305103203) do
     t.integer  "notified_object_id"
     t.string   "notified_object_type"
     t.string   "notification_code"
-    t.string   "attachment"
   end
 
   add_index "mailboxer_notifications", ["conversation_id"], :name => "index_notifications_on_conversation_id"
