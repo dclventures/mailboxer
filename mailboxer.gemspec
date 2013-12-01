@@ -21,6 +21,7 @@ Gem::Specification.new do |s|
 
   # Development Gem dependencies
   s.add_runtime_dependency('rails', '> 3.0.0')
+  s.add_runtime_dependency('identity_cache')
 
   # Debugging
   if RUBY_VERSION < '1.9'

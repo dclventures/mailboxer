@@ -3,6 +3,7 @@ class CreateMailboxer < ActiveRecord::Migration
   #Tables
   	#Conversations
     create_table :mailboxer_conversations do |t|
+      t.references :topicable, :polymorphic => true
       t.column :subject, :string, :default => ""
       t.column :created_at, :datetime, :null => false
       t.column :updated_at, :datetime, :null => false

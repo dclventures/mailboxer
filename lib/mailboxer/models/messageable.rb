@@ -13,13 +13,17 @@ module Mailboxer
 
 
       included do
+        include IdentityCache
+
         has_many :messages, :class_name => "Mailboxer::Message", :as => :sender
+        cache_has_many :messages, :embed => true
         if Rails::VERSION::MAJOR == 4
           has_many :receipts, -> { order 'created_at DESC' }, :class_name => "Mailboxer::Receipt", dependent: :destroy,     as: :receiver
         else
           # Rails 3 does it this way
           has_many :receipts, :order => 'created_at DESC',    :class_name => "Mailboxer::Receipt", :dependent => :destroy, :as => :receiver
         end
+        cache_has_many :receipts, :embed => true
       end
 
       unless defined?(Mailboxer.name_method)
@@ -53,14 +57,14 @@ module Mailboxer
       end
 
       #Sends a notification to the messageable
-      def notify(subject,body,obj = nil,sanitize_text=true,notification_code=nil,send_mail=true)
-        Mailboxer::Notification.notify_all([self],subject,body,obj,sanitize_text,notification_code,send_mail)
+      def notify(subject, body, obj = nil, sanitize_text = true, notification_code = nil, send_mail = true)
+        Mailboxer::Notification.notify_all([self], subject, body, obj, sanitize_text, notification_code, send_mail)
       end
 
       #Sends a messages, starting a new conversation, with the messageable
       #as originator
-      def send_message(recipients, msg_body, subject, sanitize_text=true, message_timestamp = Time.now)
-        convo = Mailboxer::Conversation.new({:subject => subject})
+      def send_message(recipients, msg_body, subject, topic = nil, sanitize_text = true, message_timestamp = Time.now)
+        convo = Mailboxer::Conversation.new({:subject => subject, :topicable => topic})
         convo.created_at = message_timestamp
         convo.updated_at = message_timestamp
         message = messages.new({:body => msg_body, :subject => subject})
@@ -74,7 +78,7 @@ module Mailboxer
 
       #Basic reply method. USE NOT RECOMENDED.
       #Use reply_to_sender, reply_to_all and reply_to_conversation instead.
-      def reply(conversation, recipients, reply_body, subject=nil, sanitize_text=true)
+      def reply(conversation, recipients, reply_body, subject = nil, sanitize_text = true)
         subject = subject || "RE: #{conversation.subject}"
         response = messages.new({:body => reply_body, :subject => subject})
         response.conversation = conversation
@@ -85,18 +89,18 @@ module Mailboxer
       end
 
       #Replies to the sender of the message in the conversation
-      def reply_to_sender(receipt, reply_body, subject=nil, sanitize_text=true)
+      def reply_to_sender(receipt, reply_body, subject = nil, sanitize_text = true)
         reply(receipt.conversation, receipt.message.sender, reply_body, subject, sanitize_text)
       end
 
       #Replies to all the recipients of the message in the conversation
-      def reply_to_all(receipt, reply_body, subject=nil, sanitize_text=true)
+      def reply_to_all(receipt, reply_body, subject = nil, sanitize_text = true)
         reply(receipt.conversation, receipt.message.recipients, reply_body, subject, sanitize_text)
       end
 
       #Replies to all the recipients of the last message in the conversation and untrash any trashed message by messageable
       #if should_untrash is set to true (this is so by default)
-      def reply_to_conversation(conversation, reply_body, subject=nil, should_untrash=true, sanitize_text=true)
+      def reply_to_conversation(conversation, reply_body, subject = nil, should_untrash = true, sanitize_text = true)
         #move conversation to inbox if it is currently in the trash and should_untrash parameter is true.
         if should_untrash && mailbox.is_trashed?(conversation)
           mailbox.receipts_for(conversation).untrash

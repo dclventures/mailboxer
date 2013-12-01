@@ -1,4 +1,5 @@
 class Mailboxer::Receipt < ActiveRecord::Base
+  include IdentityCache
   self.table_name = :mailboxer_receipts
   attr_accessible :trashed, :is_read, :deleted if Mailboxer.protected_attributes?
 

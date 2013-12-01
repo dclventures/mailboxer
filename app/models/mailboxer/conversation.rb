@@ -1,10 +1,16 @@
 class Mailboxer::Conversation < ActiveRecord::Base
+  include IdentityCache
   self.table_name = :mailboxer_conversations
 
   attr_accessible :subject if Mailboxer.protected_attributes?
 
   has_many :messages, :dependent => :destroy, :class_name => "Mailboxer::Message"
   has_many :receipts, :through => :messages, :class_name => "Mailboxer::Receipt"
+
+  belongs_to :topicable, :polymorphic => true
+
+  cache_has_many :messages, :embed => true
+  cache_has_many :receipts, :embed => true
 
   validates_presence_of :subject
 
