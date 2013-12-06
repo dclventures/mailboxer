@@ -9,9 +9,6 @@ class Mailboxer::Conversation < ActiveRecord::Base
 
   belongs_to :topicable, :polymorphic => true
 
-  cache_has_many :messages, :embed => true
-  cache_has_many :receipts, :embed => true
-
   validates_presence_of :subject
 
   before_validation :clean

@@ -9,8 +9,6 @@ class Mailboxer::Notification < ActiveRecord::Base
   belongs_to :notified_object, :polymorphic => :true
   has_many :receipts, :dependent => :destroy, :class_name => "Mailboxer::Receipt"
 
-  cache_has_many :receipts, :embed => true
-
   validates_presence_of :subject, :body
 
   scope :recipient, lambda { |recipient|

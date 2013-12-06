@@ -13,17 +13,15 @@ module Mailboxer
 
 
       included do
-        include IdentityCache
-
         has_many :messages, :class_name => "Mailboxer::Message", :as => :sender
-        cache_has_many :messages, :embed => true
+        cache_has_many :messages, :inverse_name => :sender, :embed => true
         if Rails::VERSION::MAJOR == 4
           has_many :receipts, -> { order 'created_at DESC' }, :class_name => "Mailboxer::Receipt", dependent: :destroy,     as: :receiver
         else
           # Rails 3 does it this way
           has_many :receipts, :order => 'created_at DESC',    :class_name => "Mailboxer::Receipt", :dependent => :destroy, :as => :receiver
         end
-        cache_has_many :receipts, :embed => true
+        cache_has_many :receipts, :inverse_name => :receiver, :embed => true
       end
 
       unless defined?(Mailboxer.name_method)

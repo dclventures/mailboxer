@@ -1,5 +1,4 @@
 class Mailboxer::Message < Mailboxer::Notification
-  include IdentityCache
   self.table_name = :mailboxer_notifications
 
   belongs_to :conversation, :class_name => "Mailboxer::Conversation", :validate => true, :autosave => true
